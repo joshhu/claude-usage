@@ -4,9 +4,9 @@ class ClaudeUsage < Formula
   # Traditional Chinese fork of phuryn/claude-usage. URL and sha256 are pinned
   # to a main-branch commit of this fork so `brew install` ships the localized
   # (Traditional Chinese) dashboard. Bump both when main moves.
-  url "https://github.com/joshhu/claude-usage/archive/refs/heads/main.tar.gz"
+  url "https://github.com/joshhu/claude-usage/archive/2cbcfc23a794118e1759c37a94ed5af8a44c6c06.tar.gz"
   version "1.2.1-zh-tw"
-  sha256 :no_check
+  sha256 "7b7ef4d0295654cac2bc8cafea963d26ed154caa375a085756f680a0bcc6b230"
   license "MIT"
   head "https://github.com/joshhu/claude-usage.git", branch: "main"
 
