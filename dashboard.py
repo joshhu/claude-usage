@@ -15,7 +15,7 @@ DB_PATH = Path.home() / ".claude" / "usage.db"
 
 def get_dashboard_data(db_path=DB_PATH):
     if not db_path.exists():
-        return {"error": "Database not found. Run: python cli.py scan"}
+        return {"error": "找不到資料庫。請先執行：python cli.py scan"}
 
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -125,11 +125,11 @@ def get_dashboard_data(db_path=DB_PATH):
 
 
 HTML_TEMPLATE = r"""<!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code Usage Dashboard</title>
+<title>Claude Code 使用量儀表板</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -225,27 +225,27 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 </head>
 <body>
 <header>
-  <h1>Claude Code Usage Dashboard</h1>
-  <div class="meta" id="meta">Loading...</div>
-  <button id="rescan-btn" onclick="triggerRescan()" title="Rebuild the database from scratch by re-scanning all JSONL files. Use if data looks stale or costs seem wrong.">&#x21bb; Rescan</button>
+  <h1>Claude Code 使用量儀表板</h1>
+  <div class="meta" id="meta">載入中...</div>
+  <button id="rescan-btn" onclick="triggerRescan()" title="刪除資料庫後重新掃描所有 JSONL 檔案，從頭重建。當資料看起來過舊或費用不正確時可使用。">&#x21bb; 重新掃描</button>
 </header>
 
 <div id="filter-bar">
-  <div class="filter-label">Models</div>
+  <div class="filter-label">模型</div>
   <div id="model-checkboxes"></div>
-  <button class="filter-btn" onclick="selectAllModels()">All</button>
-  <button class="filter-btn" onclick="clearAllModels()">None</button>
+  <button class="filter-btn" onclick="selectAllModels()">全選</button>
+  <button class="filter-btn" onclick="clearAllModels()">清除</button>
   <div class="filter-sep"></div>
-  <div class="filter-label">Range</div>
+  <div class="filter-label">區間</div>
   <div class="range-group">
-    <button class="range-btn" data-range="today" onclick="setRange('today')">Today</button>
-    <button class="range-btn" data-range="week" onclick="setRange('week')">This Week</button>
-    <button class="range-btn" data-range="month" onclick="setRange('month')">This Month</button>
-    <button class="range-btn" data-range="prev-month" onclick="setRange('prev-month')">Prev Month</button>
-    <button class="range-btn" data-range="7d"  onclick="setRange('7d')">7d</button>
-    <button class="range-btn" data-range="30d" onclick="setRange('30d')">30d</button>
-    <button class="range-btn" data-range="90d" onclick="setRange('90d')">90d</button>
-    <button class="range-btn" data-range="all" onclick="setRange('all')">All</button>
+    <button class="range-btn" data-range="today" onclick="setRange('today')">今天</button>
+    <button class="range-btn" data-range="week" onclick="setRange('week')">本週</button>
+    <button class="range-btn" data-range="month" onclick="setRange('month')">本月</button>
+    <button class="range-btn" data-range="prev-month" onclick="setRange('prev-month')">上個月</button>
+    <button class="range-btn" data-range="7d"  onclick="setRange('7d')">7 天</button>
+    <button class="range-btn" data-range="30d" onclick="setRange('30d')">30 天</button>
+    <button class="range-btn" data-range="90d" onclick="setRange('90d')">90 天</button>
+    <button class="range-btn" data-range="all" onclick="setRange('all')">全部</button>
   </div>
 </div>
 
@@ -253,17 +253,17 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <div class="stats-row" id="stats-row"></div>
   <div class="charts-grid">
     <div class="chart-card wide">
-      <h2 id="daily-chart-title">Daily Token Usage</h2>
+      <h2 id="daily-chart-title">每日 Token 用量</h2>
       <div class="chart-wrap tall"><canvas id="chart-daily"></canvas></div>
     </div>
     <div class="chart-card wide">
       <div class="chart-header">
-        <h2 id="hourly-chart-title">Average Hourly Distribution</h2>
+        <h2 id="hourly-chart-title">每小時平均分布</h2>
         <div class="chart-header-right">
-          <span class="peak-legend" title="Mon–Fri 05:00–11:00 PT — Anthropic peak-hour throttling window"><span class="peak-swatch"></span>Peak hours (PT)</span>
+          <span class="peak-legend" title="週一至週五 05:00–11:00（太平洋時間）— Anthropic 尖峰時段限流區間"><span class="peak-swatch"></span>尖峰時段（太平洋時間）</span>
           <span class="chart-day-count" id="hourly-day-count"></span>
           <div class="tz-group">
-            <button class="tz-btn" data-tz="local" onclick="setHourlyTZ('local')">Local</button>
+            <button class="tz-btn" data-tz="local" onclick="setHourlyTZ('local')">本地</button>
             <button class="tz-btn" data-tz="utc"   onclick="setHourlyTZ('utc')">UTC</button>
           </div>
         </div>
@@ -271,71 +271,71 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       <div class="chart-wrap"><canvas id="chart-hourly"></canvas></div>
     </div>
     <div class="chart-card">
-      <h2>By Model</h2>
+      <h2>依模型</h2>
       <div class="chart-wrap"><canvas id="chart-model"></canvas></div>
     </div>
     <div class="chart-card">
-      <h2>Top Projects by Tokens</h2>
+      <h2>Token 用量最高的專案</h2>
       <div class="chart-wrap"><canvas id="chart-project"></canvas></div>
     </div>
   </div>
   <div class="table-card">
-    <div class="section-title">Cost by Model</div>
+    <div class="section-title">各模型費用</div>
     <table>
       <thead><tr>
-        <th>Model</th>
-        <th class="sortable" onclick="setModelSort('turns')">Turns <span class="sort-icon" id="msort-turns"></span></th>
-        <th class="sortable" onclick="setModelSort('input')">Input <span class="sort-icon" id="msort-input"></span></th>
-        <th class="sortable" onclick="setModelSort('output')">Output <span class="sort-icon" id="msort-output"></span></th>
-        <th class="sortable" onclick="setModelSort('cache_read')">Cache Read <span class="sort-icon" id="msort-cache_read"></span></th>
-        <th class="sortable" onclick="setModelSort('cache_creation')">Cache Creation <span class="sort-icon" id="msort-cache_creation"></span></th>
-        <th class="sortable" onclick="setModelSort('cost')">Est. Cost <span class="sort-icon" id="msort-cost"></span></th>
+        <th>模型</th>
+        <th class="sortable" onclick="setModelSort('turns')">回合 <span class="sort-icon" id="msort-turns"></span></th>
+        <th class="sortable" onclick="setModelSort('input')">輸入 <span class="sort-icon" id="msort-input"></span></th>
+        <th class="sortable" onclick="setModelSort('output')">輸出 <span class="sort-icon" id="msort-output"></span></th>
+        <th class="sortable" onclick="setModelSort('cache_read')">快取讀取 <span class="sort-icon" id="msort-cache_read"></span></th>
+        <th class="sortable" onclick="setModelSort('cache_creation')">快取建立 <span class="sort-icon" id="msort-cache_creation"></span></th>
+        <th class="sortable" onclick="setModelSort('cost')">預估費用 <span class="sort-icon" id="msort-cost"></span></th>
       </tr></thead>
       <tbody id="model-cost-body"></tbody>
     </table>
   </div>
   <div class="table-card">
-    <div class="section-header"><div class="section-title">Recent Sessions</div><button class="export-btn" onclick="exportSessionsCSV()" title="Export all filtered sessions to CSV">&#x2913; CSV</button></div>
+    <div class="section-header"><div class="section-title">最近的工作階段</div><button class="export-btn" onclick="exportSessionsCSV()" title="將所有篩選後的工作階段匯出成 CSV">&#x2913; CSV</button></div>
     <table>
       <thead><tr>
-        <th>Session</th>
-        <th>Project</th>
-        <th class="sortable" onclick="setSessionSort('last')">Last Active <span class="sort-icon" id="sort-icon-last"></span></th>
-        <th class="sortable" onclick="setSessionSort('duration_min')">Duration <span class="sort-icon" id="sort-icon-duration_min"></span></th>
-        <th>Model</th>
-        <th class="sortable" onclick="setSessionSort('turns')">Turns <span class="sort-icon" id="sort-icon-turns"></span></th>
-        <th class="sortable" onclick="setSessionSort('input')">Input <span class="sort-icon" id="sort-icon-input"></span></th>
-        <th class="sortable" onclick="setSessionSort('output')">Output <span class="sort-icon" id="sort-icon-output"></span></th>
-        <th class="sortable" onclick="setSessionSort('cost')">Est. Cost <span class="sort-icon" id="sort-icon-cost"></span></th>
+        <th>工作階段</th>
+        <th>專案</th>
+        <th class="sortable" onclick="setSessionSort('last')">最後活動 <span class="sort-icon" id="sort-icon-last"></span></th>
+        <th class="sortable" onclick="setSessionSort('duration_min')">時長 <span class="sort-icon" id="sort-icon-duration_min"></span></th>
+        <th>模型</th>
+        <th class="sortable" onclick="setSessionSort('turns')">回合 <span class="sort-icon" id="sort-icon-turns"></span></th>
+        <th class="sortable" onclick="setSessionSort('input')">輸入 <span class="sort-icon" id="sort-icon-input"></span></th>
+        <th class="sortable" onclick="setSessionSort('output')">輸出 <span class="sort-icon" id="sort-icon-output"></span></th>
+        <th class="sortable" onclick="setSessionSort('cost')">預估費用 <span class="sort-icon" id="sort-icon-cost"></span></th>
       </tr></thead>
       <tbody id="sessions-body"></tbody>
     </table>
   </div>
   <div class="table-card">
-    <div class="section-header"><div class="section-title">Cost by Project</div><button class="export-btn" onclick="exportProjectsCSV()" title="Export all projects to CSV">&#x2913; CSV</button></div>
+    <div class="section-header"><div class="section-title">各專案費用</div><button class="export-btn" onclick="exportProjectsCSV()" title="將所有專案匯出成 CSV">&#x2913; CSV</button></div>
     <table>
       <thead><tr>
-        <th>Project</th>
-        <th class="sortable" onclick="setProjectSort('sessions')">Sessions <span class="sort-icon" id="psort-sessions"></span></th>
-        <th class="sortable" onclick="setProjectSort('turns')">Turns <span class="sort-icon" id="psort-turns"></span></th>
-        <th class="sortable" onclick="setProjectSort('input')">Input <span class="sort-icon" id="psort-input"></span></th>
-        <th class="sortable" onclick="setProjectSort('output')">Output <span class="sort-icon" id="psort-output"></span></th>
-        <th class="sortable" onclick="setProjectSort('cost')">Est. Cost <span class="sort-icon" id="psort-cost"></span></th>
+        <th>專案</th>
+        <th class="sortable" onclick="setProjectSort('sessions')">工作階段 <span class="sort-icon" id="psort-sessions"></span></th>
+        <th class="sortable" onclick="setProjectSort('turns')">回合 <span class="sort-icon" id="psort-turns"></span></th>
+        <th class="sortable" onclick="setProjectSort('input')">輸入 <span class="sort-icon" id="psort-input"></span></th>
+        <th class="sortable" onclick="setProjectSort('output')">輸出 <span class="sort-icon" id="psort-output"></span></th>
+        <th class="sortable" onclick="setProjectSort('cost')">預估費用 <span class="sort-icon" id="psort-cost"></span></th>
       </tr></thead>
       <tbody id="project-cost-body"></tbody>
     </table>
   </div>
   <div class="table-card">
-    <div class="section-header"><div class="section-title">Cost by Project &amp; Branch</div><button class="export-btn" onclick="exportProjectBranchCSV()" title="Export project+branch breakdown to CSV">&#x2913; CSV</button></div>
+    <div class="section-header"><div class="section-title">各專案與分支費用</div><button class="export-btn" onclick="exportProjectBranchCSV()" title="將專案＋分支的明細匯出成 CSV">&#x2913; CSV</button></div>
     <table>
       <thead><tr>
-        <th>Project</th>
-        <th>Branch</th>
-        <th class="sortable" onclick="setProjectBranchSort('sessions')">Sessions <span class="sort-icon" id="pbsort-sessions"></span></th>
-        <th class="sortable" onclick="setProjectBranchSort('turns')">Turns <span class="sort-icon" id="pbsort-turns"></span></th>
-        <th class="sortable" onclick="setProjectBranchSort('input')">Input <span class="sort-icon" id="pbsort-input"></span></th>
-        <th class="sortable" onclick="setProjectBranchSort('output')">Output <span class="sort-icon" id="pbsort-output"></span></th>
-        <th class="sortable" onclick="setProjectBranchSort('cost')">Est. Cost <span class="sort-icon" id="pbsort-cost"></span></th>
+        <th>專案</th>
+        <th>分支</th>
+        <th class="sortable" onclick="setProjectBranchSort('sessions')">工作階段 <span class="sort-icon" id="pbsort-sessions"></span></th>
+        <th class="sortable" onclick="setProjectBranchSort('turns')">回合 <span class="sort-icon" id="pbsort-turns"></span></th>
+        <th class="sortable" onclick="setProjectBranchSort('input')">輸入 <span class="sort-icon" id="pbsort-input"></span></th>
+        <th class="sortable" onclick="setProjectBranchSort('output')">輸出 <span class="sort-icon" id="pbsort-output"></span></th>
+        <th class="sortable" onclick="setProjectBranchSort('cost')">預估費用 <span class="sort-icon" id="pbsort-cost"></span></th>
       </tr></thead>
       <tbody id="project-branch-cost-body"></tbody>
     </table>
@@ -344,13 +344,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
 <footer>
   <div class="footer-content">
-    <p>Cost estimates based on Anthropic API pricing (<a href="https://claude.com/pricing#api" target="_blank">claude.com/pricing#api</a>) as of April 2026. Only models containing <em>opus</em>, <em>sonnet</em>, or <em>haiku</em> in the name are included in cost calculations. Actual costs for Max/Pro subscribers differ from API pricing.</p>
+    <p>費用估算依據 Anthropic API 定價（<a href="https://claude.com/pricing#api" target="_blank">claude.com/pricing#api</a>），以 2026 年 4 月為準。費用計算僅納入名稱包含 <em>opus</em>、<em>sonnet</em> 或 <em>haiku</em> 的模型。Max／Pro 訂閱者的實際費用與 API 定價不同。</p>
     <p>
-      GitHub: <a href="https://github.com/phuryn/claude-usage" target="_blank">https://github.com/phuryn/claude-usage</a>
+      繁體中文版：<a href="https://github.com/joshhu/claude-usage" target="_blank">https://github.com/joshhu/claude-usage</a>
       &nbsp;&middot;&nbsp;
-      Created by: <a href="https://www.productcompass.pm" target="_blank">The Product Compass Newsletter</a>
+      原始專案：<a href="https://github.com/phuryn/claude-usage" target="_blank">phuryn/claude-usage</a>
       &nbsp;&middot;&nbsp;
-      License: MIT
+      作者：<a href="https://www.productcompass.pm" target="_blank">The Product Compass Newsletter</a>
+      &nbsp;&middot;&nbsp;
+      授權：MIT
     </p>
   </div>
 </footer>
@@ -415,9 +417,9 @@ function formatHourLabel(h) {
 function tzDisplayName(tzMode) {
   if (tzMode === 'utc') return 'UTC';
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local';
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || '本地';
   } catch(e) {
-    return 'Local';
+    return '本地';
   }
 }
 
@@ -485,7 +487,7 @@ const TOKEN_COLORS = {
 const MODEL_COLORS = ['#d97757','#4f8ef7','#4ade80','#a78bfa','#fbbf24','#f472b6','#34d399','#60a5fa'];
 
 // ── Time range ─────────────────────────────────────────────────────────────
-const RANGE_LABELS = { 'today': 'Today', 'week': 'This Week', 'month': 'This Month', 'prev-month': 'Previous Month', '7d': 'Last 7 Days', '30d': 'Last 30 Days', '90d': 'Last 90 Days', 'all': 'All Time' };
+const RANGE_LABELS = { 'today': '今天', 'week': '本週', 'month': '本月', 'prev-month': '上個月', '7d': '近 7 天', '30d': '近 30 天', '90d': '近 90 天', 'all': '全部時間' };
 const RANGE_TICKS  = { 'today': 1, 'week': 7, 'month': 15, 'prev-month': 15, '7d': 7, '30d': 15, '90d': 13, 'all': 12 };
 const VALID_RANGES = Object.keys(RANGE_LABELS);
 
@@ -761,8 +763,8 @@ function applyFilter() {
   const hourlyAgg = aggregateHourly(hourlySrc, hourlyTZ);
 
   // Update daily chart title
-  document.getElementById('daily-chart-title').textContent = 'Daily Token Usage \u2014 ' + RANGE_LABELS[selectedRange];
-  document.getElementById('hourly-chart-title').textContent = 'Average Hourly Distribution \u2014 ' + RANGE_LABELS[selectedRange];
+  document.getElementById('daily-chart-title').textContent = '\u6bcf\u65e5 Token \u7528\u91cf \u2014 ' + RANGE_LABELS[selectedRange];
+  document.getElementById('hourly-chart-title').textContent = '\u6bcf\u5c0f\u6642\u5e73\u5747\u5206\u5e03 \u2014 ' + RANGE_LABELS[selectedRange];
 
   renderStats(totals);
   renderDailyChart(daily);
@@ -780,15 +782,15 @@ function applyFilter() {
 
 // ── Renderers ──────────────────────────────────────────────────────────────
 function renderStats(t) {
-  const rangeLabel = RANGE_LABELS[selectedRange].toLowerCase();
+  const rangeLabel = RANGE_LABELS[selectedRange];
   const stats = [
-    { label: 'Sessions',       value: t.sessions.toLocaleString(), sub: rangeLabel },
-    { label: 'Turns',          value: fmt(t.turns),                sub: rangeLabel },
-    { label: 'Input Tokens',   value: fmt(t.input),                sub: rangeLabel },
-    { label: 'Output Tokens',  value: fmt(t.output),               sub: rangeLabel },
-    { label: 'Cache Read',     value: fmt(t.cache_read),           sub: 'from prompt cache' },
-    { label: 'Cache Creation', value: fmt(t.cache_creation),       sub: 'writes to prompt cache' },
-    { label: 'Est. Cost',      value: fmtCostBig(t.cost),          sub: 'API pricing, Apr 2026', color: '#4ade80' },
+    { label: '工作階段',   value: t.sessions.toLocaleString(), sub: rangeLabel },
+    { label: '回合',       value: fmt(t.turns),                sub: rangeLabel },
+    { label: '輸入 Token', value: fmt(t.input),                sub: rangeLabel },
+    { label: '輸出 Token', value: fmt(t.output),               sub: rangeLabel },
+    { label: '快取讀取',   value: fmt(t.cache_read),           sub: '來自提示快取' },
+    { label: '快取建立',   value: fmt(t.cache_creation),       sub: '寫入提示快取' },
+    { label: '預估費用',   value: fmtCostBig(t.cost),          sub: 'API 定價，2026 年 4 月', color: '#4ade80' },
   ];
   document.getElementById('stats-row').innerHTML = stats.map(s => `
     <div class="stat-card">
@@ -828,8 +830,8 @@ function aggregateHourly(rows, tzMode) {
 function renderHourlyChart(agg) {
   const dayCountEl = document.getElementById('hourly-day-count');
   dayCountEl.textContent = agg.dayCount
-    ? agg.dayCount + ' day' + (agg.dayCount === 1 ? '' : 's') + ' averaged · ' + tzDisplayName(hourlyTZ)
-    : 'No data · ' + tzDisplayName(hourlyTZ);
+    ? agg.dayCount + ' 天平均 · ' + tzDisplayName(hourlyTZ)
+    : '無資料 · ' + tzDisplayName(hourlyTZ);
 
   const ctx = document.getElementById('chart-hourly').getContext('2d');
   if (charts.hourly) charts.hourly.destroy();
@@ -845,7 +847,7 @@ function renderHourlyChart(agg) {
       datasets: [
         {
           type: 'bar',
-          label: 'Avg turns / hour',
+          label: '每小時平均回合',
           data: turns,
           backgroundColor: barColors,
           yAxisID: 'y',
@@ -853,7 +855,7 @@ function renderHourlyChart(agg) {
         },
         {
           type: 'line',
-          label: 'Avg output tokens / hour',
+          label: '每小時平均輸出 Token',
           data: output,
           borderColor: TOKEN_COLORS.output,
           backgroundColor: 'rgba(167,139,250,0.15)',
@@ -877,21 +879,21 @@ function renderHourlyChart(agg) {
               const idx = items[0].dataIndex;
               const h = agg.hours[idx];
               const base = formatHourLabel(h.hour) + ' ' + tzDisplayName(hourlyTZ);
-              return h.peak ? base + ' · Peak — Anthropic US hours' : base;
+              return h.peak ? base + ' · 尖峰 — Anthropic 美國時段' : base;
             },
             label: (item) => {
-              if (item.dataset.label && item.dataset.label.indexOf('turns') !== -1) {
-                return ' Avg turns: ' + item.parsed.y.toFixed(2);
+              if (item.dataset.label && item.dataset.label.indexOf('回合') !== -1) {
+                return ' 平均回合：' + item.parsed.y.toFixed(2);
               }
-              return ' Avg output: ' + fmt(item.parsed.y);
+              return ' 平均輸出：' + fmt(item.parsed.y);
             },
           }
         },
       },
       scales: {
         x: { ticks: { color: '#8892a4', maxRotation: 0, autoSkip: false, font: { size: 10 } }, grid: { color: '#2a2d3a' } },
-        y:  { position: 'left',  beginAtZero: true, ticks: { color: '#8892a4', callback: v => v.toFixed(1) },     grid: { color: '#2a2d3a' }, title: { display: true, text: 'Avg turns / hour',         color: '#8892a4', font: { size: 11 } } },
-        y1: { position: 'right', beginAtZero: true, ticks: { color: '#8892a4', callback: v => fmt(v) }, grid: { drawOnChartArea: false },   title: { display: true, text: 'Avg output tokens / hour', color: '#8892a4', font: { size: 11 } } },
+        y:  { position: 'left',  beginAtZero: true, ticks: { color: '#8892a4', callback: v => v.toFixed(1) },     grid: { color: '#2a2d3a' }, title: { display: true, text: '每小時平均回合',         color: '#8892a4', font: { size: 11 } } },
+        y1: { position: 'right', beginAtZero: true, ticks: { color: '#8892a4', callback: v => fmt(v) }, grid: { drawOnChartArea: false },   title: { display: true, text: '每小時平均輸出 Token', color: '#8892a4', font: { size: 11 } } },
       }
     }
   });
@@ -905,10 +907,10 @@ function renderDailyChart(daily) {
     data: {
       labels: daily.map(d => d.day),
       datasets: [
-        { label: 'Input',          data: daily.map(d => d.input),          backgroundColor: TOKEN_COLORS.input,          stack: 'io',    yAxisID: 'y1' },
-        { label: 'Output',         data: daily.map(d => d.output),         backgroundColor: TOKEN_COLORS.output,         stack: 'io',    yAxisID: 'y1' },
-        { label: 'Cache Read',     data: daily.map(d => d.cache_read),     backgroundColor: TOKEN_COLORS.cache_read,     stack: 'cache', yAxisID: 'y' },
-        { label: 'Cache Creation', data: daily.map(d => d.cache_creation), backgroundColor: TOKEN_COLORS.cache_creation, stack: 'cache', yAxisID: 'y' },
+        { label: '輸入',     data: daily.map(d => d.input),          backgroundColor: TOKEN_COLORS.input,          stack: 'io',    yAxisID: 'y1' },
+        { label: '輸出',     data: daily.map(d => d.output),         backgroundColor: TOKEN_COLORS.output,         stack: 'io',    yAxisID: 'y1' },
+        { label: '快取讀取', data: daily.map(d => d.cache_read),     backgroundColor: TOKEN_COLORS.cache_read,     stack: 'cache', yAxisID: 'y' },
+        { label: '快取建立', data: daily.map(d => d.cache_creation), backgroundColor: TOKEN_COLORS.cache_creation, stack: 'cache', yAxisID: 'y' },
       ]
     },
     options: {
@@ -916,8 +918,8 @@ function renderDailyChart(daily) {
       plugins: { legend: { labels: { color: '#8892a4', boxWidth: 12 } } },
       scales: {
         x: { ticks: { color: '#8892a4', maxTicksLimit: RANGE_TICKS[selectedRange] }, grid: { color: '#2a2d3a' } },
-        y:  { position: 'left',  ticks: { color: '#74de80', callback: v => fmt(v) }, grid: { color: '#2a2d3a' }, title: { display: true, text: 'Cache', color: '#74de80' } },
-        y1: { position: 'right', ticks: { color: '#4f8ef7', callback: v => fmt(v) }, grid: { drawOnChartArea: false },    title: { display: true, text: 'Input / Output', color: '#4f8ef7' } },
+        y:  { position: 'left',  ticks: { color: '#74de80', callback: v => fmt(v) }, grid: { color: '#2a2d3a' }, title: { display: true, text: '快取', color: '#74de80' } },
+        y1: { position: 'right', ticks: { color: '#4f8ef7', callback: v => fmt(v) }, grid: { drawOnChartArea: false },    title: { display: true, text: '輸入 / 輸出', color: '#4f8ef7' } },
       }
     }
   });
@@ -937,7 +939,7 @@ function renderModelChart(byModel) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { position: 'bottom', labels: { color: '#8892a4', boxWidth: 12, font: { size: 11 } } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} tokens` } }
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}：${fmt(ctx.raw)} Token` } }
       }
     }
   });
@@ -953,8 +955,8 @@ function renderProjectChart(byProject) {
     data: {
       labels: top.map(p => p.project.length > 22 ? '\u2026' + p.project.slice(-20) : p.project),
       datasets: [
-        { label: 'Input',  data: top.map(p => p.input),  backgroundColor: TOKEN_COLORS.input },
-        { label: 'Output', data: top.map(p => p.output), backgroundColor: TOKEN_COLORS.output },
+        { label: '輸入', data: top.map(p => p.input),  backgroundColor: TOKEN_COLORS.input },
+        { label: '輸出', data: top.map(p => p.output), backgroundColor: TOKEN_COLORS.output },
       ]
     },
     options: {
@@ -973,12 +975,12 @@ function renderSessionsTable(sessions) {
     const cost = calcCost(s.model, s.input, s.output, s.cache_read, s.cache_creation);
     const costCell = isBillable(s.model)
       ? `<td class="cost">${fmtCost(cost)}</td>`
-      : `<td class="cost-na">n/a</td>`;
+      : `<td class="cost-na">不適用</td>`;
     return `<tr>
       <td class="muted" style="font-family:monospace">${esc(s.session_id)}&hellip;</td>
       <td>${esc(s.project)}</td>
       <td class="muted">${esc(s.last)}</td>
-      <td class="muted">${esc(s.duration_min)}m</td>
+      <td class="muted">${esc(s.duration_min)} 分</td>
       <td><span class="model-tag">${esc(s.model)}</span></td>
       <td class="num">${s.turns}</td>
       <td class="num">${fmt(s.input)}</td>
@@ -1026,7 +1028,7 @@ function renderModelCostTable(byModel) {
     const cost = calcCost(m.model, m.input, m.output, m.cache_read, m.cache_creation);
     const costCell = isBillable(m.model)
       ? `<td class="cost">${fmtCost(cost)}</td>`
-      : `<td class="cost-na">n/a</td>`;
+      : `<td class="cost-na">不適用</td>`;
     return `<tr>
       <td><span class="model-tag">${esc(m.model)}</span></td>
       <td class="num">${fmt(m.turns)}</td>
@@ -1183,17 +1185,17 @@ function exportProjectBranchCSV() {
 async function triggerRescan() {
   const btn = document.getElementById('rescan-btn');
   btn.disabled = true;
-  btn.textContent = '\u21bb Scanning...';
+  btn.textContent = '\u21bb \u6383\u63cf\u4e2d...';
   try {
     const resp = await fetch('/api/rescan', { method: 'POST' });
     const d = await resp.json();
-    btn.textContent = '\u21bb Rescan (' + d.new + ' new, ' + d.updated + ' updated)';
+    btn.textContent = '\u21bb \u91cd\u65b0\u6383\u63cf\uff08\u65b0\u589e ' + d.new + ' \u7b46\uff0c\u66f4\u65b0 ' + d.updated + ' \u7b46\uff09';
     await loadData();
   } catch(e) {
-    btn.textContent = '\u21bb Rescan (error)';
+    btn.textContent = '\u21bb \u91cd\u65b0\u6383\u63cf\uff08\u767c\u751f\u932f\u8aa4\uff09';
     console.error(e);
   }
-  setTimeout(() => { btn.textContent = '\u21bb Rescan'; btn.disabled = false; }, 3000);
+  setTimeout(() => { btn.textContent = '\u21bb \u91cd\u65b0\u6383\u63cf'; btn.disabled = false; }, 3000);
 }
 
 // ── Data loading ───────────────────────────────────────────────────────────
@@ -1205,8 +1207,8 @@ async function loadData() {
       document.body.innerHTML = '<div style="padding:40px;color:#f87171">' + esc(d.error) + '</div>';
       return;
     }
-    const refreshNote = rangeIncludesToday(selectedRange) ? ' \u00b7 Auto-refresh in 30s' : '';
-    document.getElementById('meta').textContent = 'Updated: ' + d.generated_at + refreshNote;
+    const refreshNote = rangeIncludesToday(selectedRange) ? ' \u00b7 30 \u79d2\u5f8c\u81ea\u52d5\u66f4\u65b0' : '';
+    document.getElementById('meta').textContent = '\u66f4\u65b0\u6642\u9593\uff1a' + d.generated_at + refreshNote;
 
     const isFirstLoad = rawData === null;
     rawData = d;

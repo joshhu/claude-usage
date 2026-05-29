@@ -95,8 +95,8 @@ describe("renderHtml with null URL (status pane)", () => {
 
   it("renders the placeholder when no URL is set", () => {
     const html = renderHtml(null, "", NONCE);
-    expect(html).toContain("Claude Code Usage");
-    expect(html).toContain("not running yet");
+    expect(html).toContain("Claude Code 使用量");
+    expect(html).toContain("尚未啟動");
     expect(html).not.toContain("<iframe");
   });
 

@@ -1,154 +1,185 @@
-# Claude Code Usage Dashboard
+# Claude Code 使用量儀表板（繁體中文版）
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![claude-code](https://img.shields.io/badge/claude--code-black?style=flat-square)](https://claude.ai/code)
+[![繁體中文](https://img.shields.io/badge/介面-繁體中文-d97757?style=flat-square)](#)
 
-**Pro and Max subscribers get a progress bar. This gives you the full picture.**
+> **這是繁體中文（台灣）在地化版本。** 整個網頁儀表板介面已翻譯成繁體中文。原始專案為 [phuryn/claude-usage](https://github.com/phuryn/claude-usage)，由 [The Product Compass Newsletter](https://www.productcompass.pm) 製作；本 fork 僅做介面在地化，核心功能與計算邏輯維持不變。
 
-Claude Code writes detailed usage logs locally — token counts, models, sessions, projects — regardless of your plan. This dashboard reads those logs and turns them into charts and cost estimates. Works on API, Pro, and Max plans.
+**Pro 與 Max 訂閱者只能看到一條進度條，這個工具讓你看到完整的使用全貌。**
 
-![Claude Usage Dashboard](docs/screenshot.png)
+無論你用的是哪一種方案，Claude Code 都會在本機寫下詳細的使用紀錄——token 數量、模型、工作階段、專案。這個儀表板會讀取這些紀錄，轉換成圖表與費用估算。API、Pro、Max 方案皆適用。
 
-**Created by:** [The Product Compass Newsletter](https://www.productcompass.pm)
+![Claude 使用量儀表板](docs/screenshot.png)
 
----
-
-## What this tracks
-
-Works on **API, Pro, and Max plans** — Claude Code writes local usage logs regardless of subscription type. This tool reads those logs and gives you visibility that Anthropic's UI doesn't provide.
-
-Captures usage from:
-- **Claude Code CLI** (`claude` command in terminal)
-- **VS Code extension** (Claude Code sidebar)
-- **Dispatched Code sessions** (sessions routed through Claude Code)
-
-**Not captured:**
-- **Cowork sessions** — these run server-side and do not write local JSONL transcripts
+> 上方截圖為原始英文介面；本 fork 的實際畫面文字皆為繁體中文。
 
 ---
 
-## Requirements
+## 這個工具追蹤什麼
 
-- Python 3.8+
-- No third-party packages — uses only the standard library (`sqlite3`, `http.server`, `json`, `pathlib`)
+適用於 **API、Pro、Max 方案**——不論訂閱類型，Claude Code 都會在本機寫下使用紀錄。這個工具讀取那些紀錄，提供 Anthropic 官方介面沒有提供的可視化資訊。
 
-> Anyone running Claude Code already has Python installed.
+可擷取的使用來源：
 
-## Quick Start
+- **Claude Code CLI**（終端機中的 `claude` 指令）
+- **VS Code 擴充套件**（Claude Code 側邊欄）
+- **Dispatched Code 工作階段**（透過 Claude Code 轉送的工作階段）
 
-No `pip install`, no virtual environment, no build step.
+**無法擷取：**
 
-### macOS / Linux (Homebrew)
+- **Cowork 工作階段**——這類工作階段在伺服器端執行，不會在本機寫下 JSONL 逐字稿
+
+---
+
+## 系統需求
+
+- Python 3.8 以上
+- 不需要任何第三方套件——只用到標準函式庫（`sqlite3`、`http.server`、`json`、`pathlib`）
+
+> 只要你在跑 Claude Code，就一定已經裝好 Python 了。
+
+## 快速開始
+
+不需要 `pip install`、不需要虛擬環境、不需要任何建置步驟。
+
+### macOS / Linux（git clone，建議用此方式取得繁體中文版）
+
 ```
-brew install --formula https://raw.githubusercontent.com/phuryn/claude-usage/main/Formula/claude-usage.rb
-claude-usage dashboard
-```
-
-After install, the `claude-usage` command is on your `PATH` and accepts the same subcommands as `python cli.py` (`scan`, `today`, `stats`, `dashboard`).
-
-### macOS / Linux (clone)
-```
-git clone https://github.com/phuryn/claude-usage
+git clone https://github.com/joshhu/claude-usage
 cd claude-usage
 python3 cli.py dashboard
 ```
 
 ### Windows
+
 ```
-git clone https://github.com/phuryn/claude-usage
+git clone https://github.com/joshhu/claude-usage
 cd claude-usage
 python cli.py dashboard
 ```
 
+### macOS / Linux（Homebrew）
+
+```
+brew install --formula https://raw.githubusercontent.com/joshhu/claude-usage/main/Formula/claude-usage.rb
+claude-usage dashboard
+```
+
+安裝完成後，`claude-usage` 指令會加入你的 `PATH`，接受與 `python cli.py` 相同的子指令（`scan`、`today`、`stats`、`dashboard`）。
+
+> 註：Homebrew formula 安裝的程式碼即為本繁體中文 fork，網頁介面同樣是繁體中文。
 
 ---
 
-## Usage
+## 使用方式
 
-> On macOS/Linux, use `python3` instead of `python` in all commands below. If you installed via Homebrew, replace `python cli.py` with `claude-usage`.
+> 在 macOS／Linux 上，以下指令請把 `python` 換成 `python3`。若你是用 Homebrew 安裝，請把 `python cli.py` 換成 `claude-usage`。
 
 ```
-# Scan JSONL files and populate the database (~/.claude/usage.db)
+# 掃描 JSONL 檔案並寫入資料庫（~/.claude/usage.db）
 python cli.py scan
 
-# Show today's usage summary by model (in terminal)
+# 在終端機顯示今天的用量摘要（依模型分組）
 python cli.py today
 
-# Show the last 7 days (per-day breakdown + by-model totals)
+# 顯示最近 7 天（每日明細 + 依模型加總）
 python cli.py week
 
-# Show all-time statistics (in terminal)
+# 在終端機顯示歷來統計
 python cli.py stats
 
-# Scan + open browser dashboard at http://localhost:8080
+# 掃描後開啟網頁儀表板 http://localhost:8080
 python cli.py dashboard
 
-# Custom host and port via environment variables
+# 透過環境變數自訂主機與連接埠
 HOST=0.0.0.0 PORT=9000 python cli.py dashboard
 
-# Scan a custom projects directory
+# 掃描自訂的 projects 目錄
 python cli.py scan --projects-dir /path/to/transcripts
 ```
 
-The scanner is incremental — it tracks each file's path and modification time, so re-running `scan` is fast and only processes new or changed files.
+> 說明：終端機指令（CLI）的輸出維持英文，網頁儀表板介面則為繁體中文。
 
-By default, the scanner checks both `~/.claude/projects/` and the Xcode Claude integration directory (`~/Library/Developer/Xcode/CodingAssistant/ClaudeAgentConfig/projects/`), skipping any that don't exist. Use `--projects-dir` to scan a custom location instead.
+掃描器採增量更新——它會記錄每個檔案的路徑與修改時間，所以重複執行 `scan` 很快，只會處理新增或變更過的檔案。
 
----
-
-## How it works
-
-Claude Code writes one JSONL file per session to `~/.claude/projects/`. Each line is a JSON record; `assistant`-type records contain:
-- `message.usage.input_tokens` — raw prompt tokens
-- `message.usage.output_tokens` — generated tokens
-- `message.usage.cache_creation_input_tokens` — tokens written to prompt cache
-- `message.usage.cache_read_input_tokens` — tokens served from prompt cache
-- `message.model` — the model used (e.g. `claude-sonnet-4-6`)
-
-`scanner.py` parses those files and stores the data in a SQLite database at `~/.claude/usage.db`.
-
-`dashboard.py` serves a single-page dashboard on `localhost:8080` with Chart.js charts (loaded from CDN). It auto-refreshes every 30 seconds and supports model filtering with bookmarkable URLs. The bind address and port can be overridden with `HOST` and `PORT` environment variables (defaults: `localhost`, `8080`).
+預設情況下，掃描器會同時檢查 `~/.claude/projects/` 以及 Xcode 的 Claude 整合目錄（`~/Library/Developer/Xcode/CodingAssistant/ClaudeAgentConfig/projects/`），不存在的目錄會自動略過。若要掃描自訂位置，請使用 `--projects-dir`。
 
 ---
 
-## Cost estimates
+## 運作原理
 
-Costs are calculated using **Anthropic API pricing as of April 2026** ([claude.com/pricing#api](https://claude.com/pricing#api)).
+Claude Code 會為每個工作階段在 `~/.claude/projects/` 寫下一個 JSONL 檔案。每一行都是一筆 JSON 紀錄，其中 `assistant` 類型的紀錄包含：
 
-**Only models whose name contains `opus`, `sonnet`, or `haiku` are included in cost calculations.** Local models, unknown models, and any other model names are excluded (shown as `n/a`).
+- `message.usage.input_tokens`——原始提示 token
+- `message.usage.output_tokens`——生成的 token
+- `message.usage.cache_creation_input_tokens`——寫入提示快取的 token
+- `message.usage.cache_read_input_tokens`——從提示快取取用的 token
+- `message.model`——使用的模型（例如 `claude-sonnet-4-6`）
 
-| Model | Input | Output | Cache Write | Cache Read |
+`scanner.py` 會解析這些檔案，並把資料存進位於 `~/.claude/usage.db` 的 SQLite 資料庫。
+
+`dashboard.py` 會在 `localhost:8080` 提供單頁式儀表板，使用 Chart.js 圖表（從 CDN 載入）。畫面每 30 秒自動更新，支援模型篩選與可加入書籤的網址。綁定位址與連接埠可用 `HOST` 與 `PORT` 環境變數覆寫（預設為 `localhost`、`8080`）。
+
+---
+
+## 費用估算
+
+費用以 **Anthropic API 定價（2026 年 4 月）** 計算（[claude.com/pricing#api](https://claude.com/pricing#api)）。
+
+**費用計算只納入名稱包含 `opus`、`sonnet` 或 `haiku` 的模型。** 本機模型、未知模型，以及任何其他名稱的模型都會被排除（顯示為「不適用」）。
+
+| 模型 | 輸入 | 輸出 | 快取寫入 | 快取讀取 |
 |-------|-------|--------|------------|-----------|
 | claude-opus-4-7 | $5.00/MTok | $25.00/MTok | $6.25/MTok | $0.50/MTok |
 | claude-opus-4-6 | $5.00/MTok | $25.00/MTok | $6.25/MTok | $0.50/MTok |
 | claude-sonnet-4-6 | $3.00/MTok | $15.00/MTok | $3.75/MTok | $0.30/MTok |
 | claude-haiku-4-5 | $1.00/MTok | $5.00/MTok | $1.25/MTok | $0.10/MTok |
 
-> **Note:** These are API prices. If you use Claude Code via a Max or Pro subscription, your actual cost structure is different (subscription-based, not per-token).
+> **注意：** 這些是 API 價格。若你是透過 Max 或 Pro 訂閱使用 Claude Code，實際的費用結構不同（以訂閱計費，而非按 token 計費）。
 
 ---
 
-## VS Code extension
+## VS Code 擴充套件
 
-If you'd rather see the dashboard inside your editor, the same UI is available as a VS Code extension. Same data, same charts, embedded as an activity-bar sidebar.
+如果你想在編輯器裡看儀表板，同樣的 UI 也以 VS Code 擴充套件的形式提供。相同的資料、相同的圖表，內嵌在活動列側邊欄中。
 
-[**Install from the VS Code Marketplace →**](https://marketplace.visualstudio.com/items?itemName=PawelHuryn.claude-usage-phuryn)
+[**從 VS Code Marketplace 安裝 →**](https://marketplace.visualstudio.com/items?itemName=PawelHuryn.claude-usage-phuryn)
 
-![VS Code extension — daily usage](docs/usage1.png)
-![VS Code extension — hourly + projects](docs/usage2.png)
+![VS Code 擴充套件——每日用量](docs/usage1.png)
+![VS Code 擴充套件——每小時 + 專案](docs/usage2.png)
 
-The Python sources are bundled inside the `.vsix`, so the only end-user requirement is **Python 3.8+ on your `PATH`**. After install, click the gauge icon in the activity bar — the server spawns automatically and the dashboard renders in the sidebar.
+Python 原始碼會打包在 `.vsix` 內，所以使用者端唯一的需求就是 **`PATH` 上有 Python 3.8 以上**。安裝後點選活動列的儀表圖示——伺服器會自動啟動，儀表板會在側邊欄中呈現。
 
-See [vscode-extension/README.md](vscode-extension/README.md) for settings, commands, discovery order, and local-install instructions.
+> Marketplace 上架的是原始英文版擴充套件。若要在編輯器中得到繁體中文介面，請改用本 fork 在本機自行安裝（細節見 [vscode-extension/README.md](vscode-extension/README.md)）。
+
+設定、指令、探索順序與本機安裝方式請見 [vscode-extension/README.md](vscode-extension/README.md)。
 
 ---
 
-## Files
+## 檔案說明
 
-| File | Purpose |
-|------|---------|
-| `scanner.py` | Parses JSONL transcripts, writes to `~/.claude/usage.db` |
-| `dashboard.py` | HTTP server + single-page HTML/JS dashboard |
-| `cli.py` | `scan`, `today`, `stats`, `dashboard` commands |
-| `Formula/claude-usage.rb` | Homebrew formula — install with `brew install --formula <raw-url>` |
-| `vscode-extension/` | VS Code extension — embeds the dashboard inside VS Code |
+| 檔案 | 用途 |
+|------|------|
+| `scanner.py` | 解析 JSONL 逐字稿，寫入 `~/.claude/usage.db` |
+| `dashboard.py` | HTTP 伺服器 + 單頁式 HTML/JS 儀表板（介面已繁體中文化） |
+| `cli.py` | `scan`、`today`、`stats`、`dashboard` 等指令 |
+| `Formula/claude-usage.rb` | Homebrew formula——以 `brew install --formula <raw-url>` 安裝 |
+| `vscode-extension/` | VS Code 擴充套件——把儀表板內嵌到 VS Code 中 |
+
+---
+
+## 在地化說明
+
+本 fork 的翻譯範圍：
+
+- **已翻譯（繁體中文）：** `dashboard.py` 的整個網頁儀表板介面，以及 VS Code 擴充套件內嵌的 webview 狀態面板（`vscode-extension/src/sidebar.ts`）。
+- **維持英文：** CLI 終端機輸出、程式碼註解、VS Code 原生指令名稱與通知、CSV 匯出檔的欄位標題（保留為穩定的機器可讀欄名，避免部分試算表軟體出現亂碼）。
+
+---
+
+## 致謝與授權
+
+- 原始專案：[phuryn/claude-usage](https://github.com/phuryn/claude-usage)
+- 作者：[The Product Compass Newsletter](https://www.productcompass.pm)
+- 授權：MIT（見 [LICENSE](LICENSE)）

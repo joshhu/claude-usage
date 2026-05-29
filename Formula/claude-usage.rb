@@ -1,14 +1,14 @@
 class ClaudeUsage < Formula
-  desc "Token, cost, and session dashboard for Claude Code usage"
-  homepage "https://github.com/phuryn/claude-usage"
-  # URL and sha256 pinned to the current main commit (v1.1.0 release).
-  # The project intentionally doesn't tag releases, so this formula needs
-  # to be bumped each release. See CHANGELOG.md for what each commit ships.
-  url "https://github.com/phuryn/claude-usage/archive/256b3e839acbaa2b850345854d77fe8dfd15e44e.tar.gz"
-  version "1.1.0"
-  sha256 "1ee3c31268100d63ca137af253ccfaaba1781e4043d3f5d84e74bcf4ec9c5133"
+  desc "Token, cost, and session dashboard for Claude Code usage (Traditional Chinese UI)"
+  homepage "https://github.com/joshhu/claude-usage"
+  # Traditional Chinese fork of phuryn/claude-usage. URL and sha256 are pinned
+  # to a main-branch commit of this fork so `brew install` ships the localized
+  # (Traditional Chinese) dashboard. Bump both when main moves.
+  url "https://github.com/joshhu/claude-usage/archive/refs/heads/main.tar.gz"
+  version "1.2.1-zh-tw"
+  sha256 :no_check
   license "MIT"
-  head "https://github.com/phuryn/claude-usage.git", branch: "main"
+  head "https://github.com/joshhu/claude-usage.git", branch: "main"
 
   depends_on "python@3.13"
 

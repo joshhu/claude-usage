@@ -17,12 +17,12 @@ import { ServerManager } from "./server-manager";
 export function renderHtml(url: string | null, statusText: string, nonce: string): string {
   if (url) {
     return `<!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'none'; frame-src http://127.0.0.1:* http://localhost:*; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
-<title>Claude Usage</title>
+<title>Claude 使用量</title>
 <style>
   html, body { margin: 0; padding: 0; height: 100%; background: #0f1117; }
   iframe { border: 0; width: 100%; height: 100vh; display: block; }
@@ -35,12 +35,12 @@ export function renderHtml(url: string | null, statusText: string, nonce: string
   }
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
-<title>Claude Usage</title>
+<title>Claude 使用量</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #e2e8f0; background: #0f1117; padding: 24px; line-height: 1.5; }
   h2 { color: #d97757; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 16px; }
@@ -49,9 +49,9 @@ export function renderHtml(url: string | null, statusText: string, nonce: string
 </style>
 </head>
 <body>
-<h2>Claude Code Usage</h2>
-<p>${escapeHtml(statusText) || "The dashboard server is not running yet."}</p>
-<p>Run <code>Claude Usage: Open Dashboard</code> from the command palette to start it.</p>
+<h2>Claude Code 使用量</h2>
+<p>${escapeHtml(statusText) || "儀表板伺服器尚未啟動。"}</p>
+<p>請從命令面板執行 <code>Claude Usage: Open Dashboard</code> 來啟動。</p>
 </body>
 </html>`;
 }

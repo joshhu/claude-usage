@@ -298,7 +298,7 @@ class TestDashboardHTTP(unittest.TestCase):
         for qs in ("?range=all", "?range=30d&models=claude-opus-4-7"):
             with urllib.request.urlopen(f"http://127.0.0.1:{self.port}/{qs}") as resp:
                 self.assertEqual(resp.status, 200)
-                self.assertIn(b"Claude Code Usage Dashboard", resp.read())
+                self.assertIn("Claude Code 使用量儀表板".encode("utf-8"), resp.read())
 
     def test_api_data_with_query_string(self):
         # /api/data is fetched without query parameters today, but the route
@@ -374,7 +374,7 @@ class TestHTMLTemplate(unittest.TestCase):
         """The 'Today' range button is wired into RANGE_LABELS, RANGE_TICKS,
         getRangeBounds, and the filter-bar HTML."""
         self.assertIn("data-range=\"today\"", HTML_TEMPLATE)
-        self.assertIn("'today': 'Today'", HTML_TEMPLATE)
+        self.assertIn("'today': '今天'", HTML_TEMPLATE)
         self.assertIn("'today': 1", HTML_TEMPLATE)
         # Bounds case: today returns start === end === today's ISO date
         self.assertIn("range === 'today'", HTML_TEMPLATE)
